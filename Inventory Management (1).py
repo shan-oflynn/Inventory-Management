@@ -1,21 +1,52 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[5]:
+# In[1]:
 
 
 from datetime import datetime
 product_lines = {}
 
 
-# In[6]:
+# In[5]:
 
 
 def get_current_timestamp():
     return datetime.now().isoformat()
 
 
-# In[3]:
+# In[9]:
+
+
+def confirm():
+    while True: 
+        confirm = input("Is information entered above correct? Enter 'yes' or 'no'.")
+        confirm_clean = confirm.strip().lower() # Cleans input
+
+        # sends a true or false to whatever part of code is being ran to confirm or reject inputted information 
+        if confirm_clean == "yes":
+            return True
+        if confirm_clean == "no": 
+            return False
+        else: 
+            print("Please enter a 'yes' or a 'no'.")   
+
+def cont_add():
+    while True:
+        add_more = input("Do you wish to add more? Enter 'yes' or 'no'.")
+        add_more_clean = add_more.strip().lower() # Cleans input
+
+        # Sends a true or false to whatever part of code is being ran 
+        if add_more_clean == "yes":
+            return True
+        if add_more_clean == "no":
+            return False
+        else: 
+            print("Please enter a 'yes' or a 'no'.")
+        
+
+
+# In[13]:
 
 
 def add_product_line():
@@ -34,30 +65,26 @@ def add_product_line():
             print("That product line already exists.")
             continue # lets user retry
 
-        # Double checks product line was entered correctly
-        yes_or_no = input(f"Is '{new_product_line_clean}' the product line you wished to enter? (yes/no)")
-        yes_or_no_clean = yes_or_no.strip().lower() # cleans input line for consistency
+        # Print the entered inputs
+        print(f"The new product line you entered was {new_product_line_clean}. Is this correct?")
 
-        # Amends the product line to product line dictionary
-        if yes_or_no_clean == "yes":
+        # Double checks product line was entered correctly
+        if confirm() == True:
+            
+            # Amends the product line to product line dictionary
             product_lines[new_product_line_clean] = {}
             print(f"'{new_product_line_clean}' has been added.")
-
-            # Asks user if they want to input more
-            input_more = input("Would you like to input another new product line?")
-            input_more_clean = input_more.strip().lower() # Cleans input for consistency
             
-            # if user inputs anything but yes, returns user to the main menu
-            if input_more_clean != "yes":
+            # Asks user if they want to input more
+            if not cont_add():
                 return
-                
-        # Asks user to correct product line input
-        elif yes_or_no_clean == "no": 
-            print("Please print correct product line.")
+            else: 
+                continue 
 
         else:
-            print("Please enter yes or no.")
-        
+            print("Please enter information again.")
+            continue
+
 
 def remove_product_line():
 
@@ -75,27 +102,25 @@ def remove_product_line():
             print("Product line doesn't exist. Please try again.")
             continue
 
-        # Double checks user wants to delete product line before deleting
-        yes_or_no = input(f"Are you sure you wish to remove '{removed_product_line_clean}'?")
-        yes_or_no_clean = yes_or_no.strip().lower()
+        # Prints the entered input
+        print(f"The product line you wish to remove is {removed_product_line_clean}.")
 
-        # If yes, removes product line from product line dictionary and tells user it has been deleted 
-        if yes_or_no_clean == "yes":
+        # Double checks product line was entered correctly
+        if confirm() == True:
+
+            # If yes, removes product line from product line dictionary and tells user it has been deleted 
             del product_lines[removed_product_line_clean]
             print(f"'{removed_product_line_clean}' has been successfully removed.")
 
-            # Gives user option to delete more
-            delete_more = input("Is there another product line you wish to delete?")
-            delete_more_clean = delete_more.strip().lower()
-            if delete_more_clean != "yes":
+            # Asks user if they want to input more
+            if not cont_add():
                 return
+            else: 
+                continue 
 
-        # If user enters no, asks user to enter correct product line
-        elif yes_or_no_clean == "no":
-            print("Please enter correct product line.")
-
-        else: 
-            print("Please enter yes or no.")
+        else:
+            print("Please enter information again.")
+            continue
 
 def edit_product_line():
     while True:
@@ -108,9 +133,12 @@ def edit_product_line():
         if change_choice_clean == "main menu":
             return
 
+        # Asks user for what they wish to change product line to 
         elif change_choice_clean in product_lines:
             changed_product_line = input(f"What do you wish to change {change_choice_clean} to. Or type back to return.")
             changed_product_line_clean = changed_product_line.strip().lower()
+
+            # If product line is already what was entered, tells them, and sends them back to top of edit_product_line
             if changed_product_line_clean == change_choice_clean:
                 print("Product line is already that value. Please try again.")
                 continue
@@ -118,23 +146,32 @@ def edit_product_line():
             # Returns user to edit product line
             if changed_product_line_clean == "back":
                 continue
-                
+
+            # If the changes to the product line are different than the previously entered product line, ask for confirmation on changes
             elif changed_product_line_clean != change_choice_clean:
-                yes_or_no = input(f"Are you sure you want to change '{change_choice_clean}' to '{changed_product_line_clean}'?")
-                yes_or_no_clean = yes_or_no.strip().lower()
+                if not confirm():
+                    continue # If the user says it is wrong, don't make changes, go back to top of defintion
 
-                if yes_or_no_clean != "yes":
-                    print("No changes were made.")
-                    continue
-                    
-                elif yes_or_no_clean == "yes":
-                    product_lines[changed_product_line_clean] = product_lines.pop(change_choice_clean)
+                # Makes changes to the product line
+                product_lines[changed_product_line_clean] = product_lines.pop(change_choice_clean)
+                print(f"Product line has been successfully changed to '{changed_product_line_clean}'.")
 
-        elif change_choice_clean not in product_lines:
-            print("Product line is not valid. Please try again.")
+                # Asks user if they want to make more changes
+                more_changes = input("Do you want to make more changes? Enter 'yes' or 'no'.")
+                more_changes_clean = more_changes.strip().lower() # cleans input
+                if more_changes_clean == "yes":
+                    continue # Go back to top of definition to allow more changes
+                else: 
+                    return # Stop the code
+
+        # Raises error if product line doesn't exist and sends them to enter a product line to edit
+        else:
+            print("Product line not found. Please try again.")
+            continue
+               
 
 
-# In[4]:
+# In[14]:
 
 
 def add_product(): 
@@ -150,53 +187,60 @@ def add_product():
                 
             choice_index = int(input("Please input the number of your selection: "))
             selected_product_line = product_line_list[choice_index - 1]
-            break
+            
         # Loops back if user doesn't enter a number
         except (ValueError, IndexError):
             print("Please enter a number.")
-            continue
-
-    # Asks user to confirm choice
-    while True: 
-        yes_or_no = input(f"Is {selected_product_line} the correct product line?")
-        yes_or_no_clean = yes_or_no.strip().lower()
-        if yes_or_no_clean != "yes":
-            print("Invalid input. Try again")
-            # Loops back to try again
-            continue
-
-        elif yes_or_no_clean == "yes":
+            continue # Takes user back to start of loop
+            
+        # Asks user to confirm choice 
+        print(f"Is {selected_product_line} the correct product line?")
+        if confirm() == True:
             break
-
+        # Loops back to try again
+        else:
+            continue
+            
     # Asks user to enter product name 
     while True: 
         product_to_add = input(f"Please input the product you wish to add to {selected_product_line}.")
         product_to_add_clean = product_to_add.strip().lower()
-        yes_or_no = input(f"Is {product_to_add_clean} the product you wish to add to {selected_product_line}?")
-        yes_or_no_clean = yes_or_no.strip().lower()
-        if yes_or_no_clean != "yes":
-            print("Please try again.")
-            continue
 
-        elif yes_or_no_clean == "yes":
+        # Asks user to confirm input
+        print(f"Is {product_to_add_clean} the product you wish to add to {selected_product_line}?")
+
+        # if input is confirmed, give option to edit new product's details
+        if confirm() == True:
             product_lines[selected_product_line][product_to_add_clean] = {}
             print(f"{product_to_add_clean} has been added to {selected_product_line}. \n"
             f"Would you like to edit {product_to_add_clean} details now?")
             yes_or_no = input("Please enter yes or no.")
             yes_or_no_clean = yes_or_no.strip().lower()
+
+            # if user enters 'no', exit loop
             if yes_or_no_clean == "no":
                 print("Have a nice day.")
-                break
+                return
+
+            # if user enters 'yes', take to edit product details
             elif yes_or_no_clean == "yes":
                 edit_product_details()
+                return # exits after user edits the product details
+
+            # if user enters something other than 'yes' or 'no', raise error and take back to start of loop
             else: 
                 print("Invalid input. Please try again.")
+
+        # if input is noted as incorrect, send back to top of loop to try again
+        else:
+            continue
+            
 
 def remove_product():
     # Asks users to choose a product line they would like to remove a product from 
     while True:
         try: 
-            print("Please select which product line you would like to add a product to.")
+            print("Please select which product line you would like to remove a product from.")
             product_line_list = list(product_lines.keys())
 
             for i, product_line in enumerate(product_line_list, 1):
@@ -204,23 +248,20 @@ def remove_product():
                 
             choice_index = int(input("Please input the number of your selection: "))
             selected_product_line = product_line_list[choice_index - 1]
-            break
+            
         # Loops back if user doesn't enter a number
         except (ValueError, IndexError):
             print("Please enter a number.")
             continue
 
-    # Asks user to confirm choice
-    while True: 
-        yes_or_no = input(f"Is {selected_product_line} the correct product line?")
-        yes_or_no_clean = yes_or_no.strip().lower()
-        if yes_or_no_clean != "yes":
-            print("Invalid input. Try again")
-            # Loops back to try again
-            continue
-
-        elif yes_or_no_clean == "yes":
+        # ONLY runs if try succeeds
+        # Asks user to confirm choice
+        print(f"Is {selected_product_line} the correct product line?")
+        if confirm() == True:
             break
+        else: 
+            print("Please enter correct product line.")
+            continue
 
     # Prints products under that product line
     while True: 
@@ -231,103 +272,84 @@ def remove_product():
                 print(f" {i}:{product}")
             choice_index = int(input("Please input the number of your selection"))
             selected_product = product_list[choice_index - 1]
-            break
+            
         # Loops back if user doesn't enter a number
         except (ValueError, IndexError):
             print("Please enter a number.")
             continue
 
-    # Asks user to confirm selection
-    while True: 
-        yes_or_no = input(f"Is {selected_product} the correct product line?")
-        yes_or_no_clean = yes_or_no.strip().lower()
-        if yes_or_no_clean != "yes":
-            print("Invalid input. Try again")
-            # Loops back to try again
-            continue
+        # Asks user to confirm selection 
+        print(f"Is {selected_product} the correct product?")
 
-        elif yes_or_no_clean == "yes":
-            # Moves to next bit of code
-            break
+        # if user confirms, selected product is deleted 
+        if confirm() == True:
+            del product_lines[selected_product_line][selected_product]
+            print(f"{selected_product.title()} has been deleted.")
+            return
+        else: 
+            print("Please enter the correct product you wish to delete.")
+            continue # takes back to start of loop to try again
 
-    # Deletes selected product from the products dictionary
-    del product_lines[selected_product_line][selected_product]
-                  
-
+            
 def edit_product_name():
     # Asks for product line and confirms with user entered product line is correct
     while True:
-        product_line_name = input("Please enter product line name.")
+        product_line_name = input("Please enter product line name that the product you would like to edit is under.")
         product_line_name_clean = product_line_name.strip().lower()
         # If product line not in entered product line list, gives error and asks to try again.
         if product_line_name_clean not in product_lines:
             print("That product line doesn't exist. Please try again.")
             continue
 
-        yes_or_no = input(f"Is {product_line_name_clean} correct?")
-        yes_or_no_clean = yes_or_no.strip().lower()
-        if yes_or_no_clean != "yes":
-            # Takes user back to beginning of while loop to try again
-            print("Please try again.")
-            continue
-        elif yes_or_no_clean == "yes":
-            # Moves to next part of code
+        # Asks for confirmation on product line name 
+        print(f"Is {product_line_name_clean} correct?")
+        
+        # Continue with rest of code if confirmed
+        if confirm() == True:
             break
 
     while True:
         try:
-            print(f"Please select which product under {product_line_name_clean} you would like to delete.")
+            # Gives list of products under selected product line for user to select from
+            print(f"Please select which product under {product_line_name_clean} you would like to edit.")
             product_list = list(product_lines[product_line_name_clean].keys())
             for i, product in enumerate(product_list, 1):
                 print(f" {i}:{product}")
             choice_index = int(input("Please input the number of your selection"))
             selected_product = product_list[choice_index - 1]
-            break
+            
         # Loops back if user doesn't enter a number
         except (ValueError, IndexError):
             print("Please enter a number.")
             continue
 
+        # Asks user to confirm selection 
+        print(f"Is {selected_product} the product you wish to edit?")
+        if confirm() == True:
+            break # continues with next bit of code
+        else: 
+            continue # Repeats code to allow user to retry
 
-            # Asks user to confirm selection
-    while True: 
-        yes_or_no = input(f"Is {selected_product} the correct product line?")
-        yes_or_no_clean = yes_or_no.strip().lower()
-        if yes_or_no_clean != "yes":
-            print("Invalid input. Try again")
-            # Loops back to try again
-            continue
+    # Asks user what they want to replace with
+    new_product_name = input(f"Please enter the product name you would like to replace {selected_product} with.")
 
-        elif yes_or_no_clean == "yes":
-            # Moves to next bit of code
+    # Asks user to confirm selection
+    while True:    
+        print(f"Is {new_product_name} what you want to replace {selected_product} with?")
+        if confirm() == True: 
+            # Changes the product's name
+            product_lines[product_line_name_clean][new_product_name] = \
+            product_lines[product_line_name_clean].pop(selected_product)
+            print(f"The product name of {new_product_name} has been saved.")
             break
+        else:
+            print("Please try again.")
+            new_product_name = input(f"Please enter your new product name to replace {selected_product}.")
 
-    # Asks user to input new product name
-    new_product_name = input(f"Please enter the new product name to replace {selected_product}.")
-
-    # Asks user to confirm name change
-    while True: 
-        yes_or_no = input(f"Is {new_product_name} what you want to replace {selected_product} with?")
-        yes_or_no_clean = yes_or_no.strip().lower()
-        if yes_or_no_clean != "yes":
-            print("Invalid input. Try again")
-            # Loops back to try again
-            continue
-
-        elif yes_or_no_clean == "yes":
-            # Moves to next bit of code
-            break
-
-    # Changes the product's name
-    correct_name = product_lines[product_line_name_clean].pop(selected_product)
-    product_lines[product_line_name_clean][new_product_name] = correct_name
-
-    # Confirms that product name was successfully updated 
-    print("Product name was successfully updated!")
-        
+            
 
 
-# In[10]:
+# In[1]:
 
 
 # Still need to add confirmation checks before saving the product details
@@ -339,29 +361,54 @@ def add_product_details():
             print("Please select which product line the product you would like to add details is under.")
             product_line_list = list(product_lines.keys())
 
+            # Gives user list of product lines to select from 
             for i, product_line in enumerate(product_line_list, 1):
                 print(f"{i}: {product_line}")
 
+            # Asks user for selection from product line list
             choice_index = int(input("Please input the number of your selection: "))
             selected_product_line = product_line_list[choice_index -1]
-            break
-        except ValueError: 
+
+        # If entered product line is not an integer or exceeds range, raises error and asks user to try again (loops)    
+        except (ValueError, IndexError): 
             print("Please enter a valid input from the list.")
+            continue
+
+        # Prints selected product line
+        print(f"Is {selected_product_line} the product line you would like to add product details to?")
+
+        # Asks user to confirm selected product line choice
+        if confirm() == True:
+            break # moves on to next code
+        else: 
+            print("Please try again.") # Loops back to try again
 
     # Asks user to choose product from chosen product line's product list
     while True: 
         try:
             print(f"Please select which product you would like to add details to under the {selected_product_line}'s products.")
             product_list = list(product_lines[selected_product_line].keys())
-    
+
+            # Gives user a list of products from selected product line to choose from 
             for i, product in enumerate(product_list, 1):
                 print(f"{i}: {product}")
 
+            # Asks user to select number of product 
             choice_index = int(input("Please input the number of your selection: "))
             selected_product = product_list[choice_index - 1]
-            break
-        except ValueError: 
+
+        # If user enters a non-integer or an integer out of range, gives error and asks to try again
+        except (ValueError, IndexError): 
             print("Please enter a valid input from the list.")
+            continue # loops to allow user to try again
+
+        # Prints user's choice to ask for confirmation 
+        print(f"Is {selected_product} the product you want to add details to?")
+        if confirm() == True:
+            break # moves on to next code
+        else:
+            print("Please try again.") # loops back to try again
+
 
     # Asks user to input product id number or skip. Skip stores id number as none. 
     while True: 
@@ -369,74 +416,174 @@ def add_product_details():
         if product_id_input.lower().strip() == "skip":
             product_id = None
             break
+        # raises an error if entered product id is not an error. Loops to try again
         try:
             product_id = int(product_id_input)
-            break
+            break # if product id is an integer, exits loop 
         except ValueError:
             print("Please enter an integer for the product id or skip.")
 
+    # Asks user to confirm the product id number
+    if product_id is not None:
+        print(f"Is entered {product_id} correct.") 
+        while True:
+            try:
+                if confirm() == True:
+                    break # if confirmed, moves on to ask for sku number 
+                else: 
+                    print("Please try again.")
+                    product_id = int(input("Please enter product id.")) # loops back to try again
+
+            except ValueError:
+                print("Please enter an integer.") #if not an integer, raises error and loops back to try again
+            
     # Asks user to input sku number or skip. Skip stores sku as none
     while True: 
         sku_input = input("Please enter the sku number of this product or enter 'skip'.")
         if sku_input.lower().strip() == "skip":
             sku = None
-            break
+            break # ends loop and stores sku as None
         try: 
             sku = int(sku_input)
-            break 
+            break # if sku is an integer, breaks out of loop
         except ValueError: 
-            print("Please enter an integer for the sku number or skip.")
-            
+            print("Please enter an integer for the sku number or skip.") # if sku isn't an integer, raises error, and loops to try again
+
+    # Asks user to confirm the sku number
+    if sku is not None:
+        print(f"Is entered {sku} correct.") 
+        while True:
+            try:
+                if confirm() == True:
+                    break # if confirmed, ends loop
+                # if not confirmed, asks user for correct sku
+                else: 
+                    print("Please try again.")
+                    sku = int(input("Please enter product id.")) 
+
+            except ValueError:
+                print("Please enter an integer.") # raises an error if entered sku isn't an integer. Loops to try again
 
     # Asks user to input price or skip. Skip stores price as none. 
     while True: 
         price_input = input("Please enter the price of this product or enter 'skip'.")
         if price_input.lower().strip() == "skip":
-            price = None
-            break
+            price = None # if price is entered as skip, stores price as none and ends loop
+            break 
         try:
             price = float(price_input) 
-            break
+            break # if price is entered as a decimal, ends loop
         except ValueError: 
-            print("Please enter a decimal for the price or skip.")
+            print("Please enter a decimal for the price or skip.") # if price isn't entered as a loop, raises error, and allows user to try again
+
+    # Asks user to confirm the price
+    if price is not None:
+        print(f"Is entered {price} correct.") 
+        while True:
+            try:
+                if confirm() == True:
+                    break # if price is confirmed, ends loop
+                # if not confirmed, asks user to enter correct price
+                else: 
+                    print("Please try again.")
+                    price = float(input("Please enter price.")) 
+                    
+            except ValueError:
+                print("Please enter an decimal.") # raises error if not a decimal value and allows user to try again
+
 
     # Asks user to input the quantity on hand of the product or skip. Skip stores quantity as none. 
     while True: 
         quantity_input = input("Please enter the quantity on hand of this product or enter 'skip'.")
         if quantity_input.lower().strip() == "skip":
-            quantity = None
+            quantity = None # if quantity is entered as skip, stores as none, and ends loop
             break
         try: 
             quantity = int(quantity_input)
-            break
+            break # if quantity is entered as an integer, moves on to next code
         except ValueError:
-            print("Please enter an integer for the quantity on hand or skip.")
+            print("Please enter an integer for the quantity on hand or skip.") # if not entered as integer, raises error, and allows user to try again
+
+    # Asks user to confirm the quantity on hand
+    if quantity is not None:
+        print(f"Is entered {quantity} correct.") 
+        while True:
+            try:
+                # if confirmed, ends loop
+                if confirm() == True:
+                    break
+                # if not confirmed, asks user to try again
+                else: 
+                    print("Please try again.")
+                    quantity = int(input("Please enter quantity."))
+
+            # raises an error if entered value isn't an integer and allows user to try again
+            except ValueError:
+                print("Please enter an integer.")
 
     # Asks user to input the reorder level (1-10) of the product. Skip stores reorder level as not determined. 
     # 1 is low, 10 is highest
     while True:
-        reorder_input = input("Please enter the reorder level of this product or enter 'skip'. 1 is the lowest and 10 is the highest.")
-        if reorder_input.lower().strip() == "skip":
-            reorder = "Not determined"
+        reorder_input = input("Enter reorder level (1-10) or 'skip'")
+        reorder_input_clean = reorder_input.lower().strip()
+
+        # if reorder value is entered as skip, store as none, and end loop
+        if reorder_input_clean == "skip":
+            reorder_level = None
             break
+
         try:
-            reorder_value = int(reorder_input)
-            if 1 <= reorder_value <= 10:
-                reorder = int(reorder_value)
-                break
-            else: 
-                print("Invalid input. Please enter a number 1 to 10. Or enter skip to skip.")
+            reorder_level = int(reorder_input)
+
+            # ensures reorder level is between 1 and 10
+            if 1 <= reorder_level <= 10:
+                break # if reorder level is between 1 and 10, moves on to next part of code
+            else:
+                print("Please enter a number from 1 to 10.") # if not, asks user to try again
+
         except ValueError:
-            print("Please enter an integer or skip.")
+            print("Please enter a valid integer or 'skip'.") # if not an integer, asks user to try again
+
+    # Asks user to confirm reorder level
+    if reorder_level is not None:
+        while True:
+            print(f"Is entered {reorder_level} correct?")
+
+            # if reorder level is confirmed, moves onto next part of code
+            if confirm():
+                break
+
+            # if not confirmed, asks user to try again
+            else:
+                print("Please try again.")
+
+            try:
+                # checks for same parameters as before (must be an integer between 1 and 10)
+                reorder_level = int(input("Please enter reorder value (1–10): "))
+                if not (1 <= reorder_level <= 10):
+                    print("Must be 1–10.")
+            except ValueError:
+                print("Please enter an integer.")
 
     # Asks user to input supplier name or skip 
     supplier_input = input("Please enter the supplier of this product or enter 'skip'.")
     if supplier_input.lower().strip() == "skip":
-        supplier = None
-        break
+        supplier = None # if supplier is entered as skip, stores as none, and moves onto next part of code
     else:
         supplier = str(supplier_input)
-        break
+
+    # Asks user to confirm the supplier name
+    if supplier is not None:
+        while True:
+            print(f"Is entered {supplier} correct.") 
+
+            if confirm() == True:
+                break # if supplier is confirmed, moves onto next part of code
+                
+            # if not confirmed, asks user to try again
+            else: 
+                print("Please try again.")
+                supplier = input("Please enter supplier.")
 
     # Stores the inputs in the designated product dictionary for future reference
     product_lines[selected_product_line][selected_product]["product_id"] = product_id
@@ -450,7 +597,56 @@ def add_product_details():
     product_lines[selected_product_line][selected_product]['last_updated'] = get_current_timestamp()
 
 def remove_product_details():
-    pass
+    # Asks user to choose product line from list
+    while True: 
+        try:
+            print("Please select which product line the product you would like to remove details is from.")
+            product_line_list = list(product_lines.keys())
+
+            for i, product_line in enumerate(product_line_list, 1):
+                print(f"{i}: {product_line}")
+
+            choice_index = int(input("Please input the number of your selection: "))
+            selected_product_line = product_line_list[choice_index -1]
+            break
+        except (ValueError, IndexError): 
+            print("Please enter a valid input from the list.")
+
+    # Asks user to confirm choice
+    while True:
+        print(f"Is {selected_product_line} correct?")
+        if confirm() == True:
+            break
+        else:
+            print("Please select again.")
+
+    # Asks user to choose product from chosen product line's product list
+    while True: 
+        try:
+            print(f"Please select which product you would like to remove details to under the {selected_product_line}'s products.")
+            product_list = list(product_lines[selected_product_line].keys())
+    
+            for i, product in enumerate(product_list, 1):
+                print(f"{i}: {product}")
+
+            choice_index = int(input("Please input the number of your selection: "))
+            selected_product = product_list[choice_index - 1]
+            break
+        except (ValueError, IndexError): 
+            print("Please enter a valid input from the list.")
+
+    # Asks user to confirm selection
+    while True: 
+        print(f"Is {selected_product} the product you wish to delete details from?")
+        if confirm == True:
+            break
+
+        else:
+            print("Please select again.")
+
+    # Displays previously entered information for product
+    # Asks which part of product details the user wishes to delete
+    # Deletes selected part of product details
 
 def edit_product_details():
     pass
