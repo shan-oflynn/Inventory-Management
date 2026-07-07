@@ -349,7 +349,7 @@ def edit_product_name():
             
 
 
-# In[1]:
+# In[2]:
 
 
 # Still need to add confirmation checks before saving the product details
@@ -631,22 +631,50 @@ def remove_product_details():
 
             choice_index = int(input("Please input the number of your selection: "))
             selected_product = product_list[choice_index - 1]
-            break
+            
         except (ValueError, IndexError): 
             print("Please enter a valid input from the list.")
+            continue
 
     # Asks user to confirm selection
-    while True: 
         print(f"Is {selected_product} the product you wish to delete details from?")
-        if confirm == True:
+        if confirm() == True:
             break
 
         else:
             print("Please select again.")
 
     # Displays previously entered information for product
-    # Asks which part of product details the user wishes to delete
+    while True:
+        try:
+            fields = list(product_lines[selected_product_line][selected_product].keys())
+
+            print("\nWhat information would you like to view?")
+            for i, field in enumerate(fields, start=1):
+                print(f"{i}. {field}")
+
+            choice = int(input("Enter the number of what you would like to delete: "))
+
+            selected_field = fields[choice - 1]
+
+        except (ValueError, IndexError):
+            print("Please enter a valid input from the list.")
+            continue
+
+        # Asks user to confirm selection
+        print(f"You selected {product_lines[selected_product_line][selected_product][selected_field]}. Is this what you want to delete?")
+
+        if confirm() == True:
+            break
+
+        else: 
+            print("Please try again.")
+
     # Deletes selected part of product details
+    del product_lines[selected_product_line][selected_product][selected_field]
+
+    # Saves deletion
+    # Asks if user wants to delete more
 
 def edit_product_details():
     pass
